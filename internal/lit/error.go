@@ -46,7 +46,7 @@ func ErrorMessage(err error) string {
 	return "Internal error."
 }
 
-func ErrorF(code string, format string, args ...interface{}) *Error {
+func Errorf(code string, format string, args ...interface{}) *Error {
 	return &Error{
 		Code:    code,
 		Message: fmt.Sprintf(format, args...),

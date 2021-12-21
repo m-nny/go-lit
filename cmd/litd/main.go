@@ -21,8 +21,14 @@ func main() {
 
 	// Instantiate a new type to represent our application.
 	// This type lets us shared setup code with our end-to-end tests.
-	app := lit.NewApp()
+	app := NewApp()
 
+	if err := app.Load(); err != nil {
+		app.Close()
+		fmt.Fprintln(os.Stderr, err)
+		lit.ReportError(ctx, err)
+		os.Exit(1)
+	}
 	if err := app.Run(ctx); err != nil {
 		app.Close()
 		fmt.Fprintln(os.Stderr, err)

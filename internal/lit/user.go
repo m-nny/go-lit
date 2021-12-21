@@ -7,7 +7,7 @@ import (
 
 // User represents a user in the system.
 type User struct {
-	ID int `json:"id"`
+	ID uint `json:"id"`
 
 	Name  string `json:"name"`
 	Email string `json:"email"`
@@ -23,7 +23,7 @@ type User struct {
 // This only performs basic validation.
 func (u *User) Validate() error {
 	if u.Name == "" {
-		return ErrorF(EINVALID, "User name required.")
+		return Errorf(EINVALID, "User name required.")
 	}
 	return nil
 }
@@ -32,7 +32,7 @@ func (u *User) Validate() error {
 type UserService interface {
 	// Retrieves a user by ID along with their associated auth objects.
 	// Returns ENOTFOUND if user does not exist.
-	FindUserById(ctx context.Context, id int) (*User, error)
+	FindUserById(ctx context.Context, id uint) (*User, error)
 
 	// Retrieves a list of users by filter. Also returns total count of matching
 	// users which may differ from returned results if filter.Limit is specified.
@@ -44,11 +44,11 @@ type UserService interface {
 
 	// Updates a user object. Returns EUNAUTHORIZED if current user is not
 	// the user that is being updated. Returns ENOTFOUND if user does not exist.
-	UpdateUser(ctx context.Context, id int, upd UserUpdate) (*User, error)
+	UpdateUser(ctx context.Context, id uint, upd UserUpdate) (*User, error)
 
 	// Permanently deletes a user and all owned submissions, problebs. Returns EUNAUTHORIZED
 	// if current user is not the user admin. Returns ENOTFOUND if user does not exist.
-	Deleteuser(ctx context.Context, id int) error
+	DeleteUser(ctx context.Context, id uint) error
 }
 
 // UserFilter represents a filter passed to FindUsers().

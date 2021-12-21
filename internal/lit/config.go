@@ -12,11 +12,12 @@ type AppConfig struct {
 }
 
 type dbConfig struct {
-	Host     string `env:"DB_HOST,default=localhost"`
-	Port     int    `env:"DB_PORT,default=9001"`
-	Username string `env:"DB_USERNAME,default=manny"`
-	Password string `env:"DB_PASSWORD,default=change-in-production"`
-	DbName   string `env:"DB_NAME,default=brain"`
+	DSN string `env:"DB_DSN,default=data/gorm.db"`
+	// Host     string `env:"DB_HOST,default=localhost"`
+	// Port     int    `env:"DB_PORT,default=9001"`
+	// Username string `env:"DB_USERNAME,default=manny"`
+	// Password string `env:"DB_PASSWORD,default=change-in-production"`
+	// DbName   string `env:"DB_NAME,default=brain"`
 }
 
 type serverConfig struct {
