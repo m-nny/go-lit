@@ -1,18 +1,13 @@
-package db
+package gorm
 
 import (
-	"context"
-
 	"github.com/m-nny/go-lit/internal/lit"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type DB struct {
-	gDb    *gorm.DB
-	ctx    context.Context // background context
-	cancel func()          // cancel background context
-
+	gorm *gorm.DB
 	// Datasource name.
 	DSN string
 
@@ -22,11 +17,7 @@ type DB struct {
 }
 
 func NewDB(dsn string) *DB {
-	ctx, cancel := context.WithCancel(context.Background())
 	return &DB{
-		ctx:    ctx,
-		cancel: cancel,
-
 		DSN: dsn,
 	}
 }
@@ -35,20 +26,19 @@ func (db *DB) Open() (err error) {
 	if db.DSN == "" {
 		return lit.Errorf(lit.EINVALID, "dsn required")
 	}
-	if db.gDb, err = gorm.Open(sqlite.Open(db.DSN), &gorm.Config{}); err != nil {
+	if db.gorm, err = gorm.Open(postgres.Open(db.DSN), &gorm.Config{}); err != nil {
 		return err
 	}
 
-	db.gDb.AutoMigrate(&UserModel{})
+	db.gorm.AutoMigrate(&UserModel{})
 
 	return nil
 }
 
 func (db *DB) Close() (err error) {
-	db.cancel()
 
-	if db.gDb != nil {
-		sqlDb, err := db.gDb.DB()
+	if db.gorm != nil {
+		sqlDb, err := db.gorm.DB()
 		if err != nil {
 			return err
 		}

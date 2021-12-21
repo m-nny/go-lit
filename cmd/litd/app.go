@@ -5,12 +5,12 @@ import (
 	"log"
 
 	"github.com/m-nny/go-lit/internal/lit"
-	"github.com/m-nny/go-lit/internal/lit/db"
+	"github.com/m-nny/go-lit/internal/lit/gorm"
 )
 
 type App struct {
 	Config *lit.AppConfig
-	Db     *db.DB
+	Db     *gorm.DB
 }
 
 func NewApp() *App {
@@ -20,7 +20,7 @@ func (app *App) Load() (err error) {
 	if app.Config, err = lit.LoadAppConfig(); err != nil {
 		return err
 	}
-	app.Db = db.NewDB(app.Config.Db.DSN)
+	app.Db = gorm.NewDB(app.Config.Db.DSN())
 	return nil
 }
 
