@@ -9,8 +9,8 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "entites.md",
-            "mode": "preview"
+            "file": "auth.md",
+            "mode": "source"
           }
         }
       }
@@ -68,7 +68,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "entites.md",
+                "file": "auth.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -88,6 +88,9 @@
   },
   "active": "6dbab56158e46a02",
   "lastOpenFiles": [
-    "entites.md"
+    "auth.md",
+    "todo.md",
+    "entites.md",
+    "Untitled.md"
   ]
 }
