@@ -16,10 +16,10 @@ const (
 
 type Error struct {
 	// Machine-readable error code.
-	Code string
+	Code string `json:"code"`
 
 	// User-readable error code.
-	Message string
+	Message string `json:"message"`
 }
 
 func (e *Error) Error() string {

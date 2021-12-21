@@ -2,6 +2,7 @@ package gorm
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/m-nny/go-lit/internal/lit"
@@ -76,6 +77,9 @@ func (s *UserService) DeleteUser(ctx context.Context, id uint) error {
 func (s *UserService) FindUserById(ctx context.Context, id uint) (*lit.User, error) {
 	var userModel UserModel
 	result := s.gormDb.First(&userModel, id)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, lit.Errorf(lit.ENOTFOUND, `User with id "%d" not found`, id)
+	}
 	return userModel.User(), result.Error
 }
 
@@ -85,7 +89,7 @@ func (s *UserService) FindUsers(ctx context.Context, filter lit.UserFilter) ([]*
 	userModels := []UserModel{}
 	// var userModels []UserModel
 	var count int64 = 0
-	result := s.gormDb.Find(&userModels)
+	result := s.gormDb.WithContext(ctx).Where(filter).Find(&userModels)
 	return Users(userModels), int(count), result.Error
 }
 
