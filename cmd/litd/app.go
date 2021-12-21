@@ -1,37 +1,38 @@
 package main
 
 import (
-	"context"
 	"log"
 
 	"github.com/m-nny/go-lit/internal/lit"
+	"github.com/m-nny/go-lit/internal/lit/echo"
 	"github.com/m-nny/go-lit/internal/lit/gorm"
 )
 
 type App struct {
-	Config *lit.AppConfig
-	Db     *gorm.DB
+	config      *lit.AppConfig
+	gormService *gorm.GormService
+	httpServer  *echo.HttpServer
+
+	userService lit.UserService
 }
 
 func NewApp() *App {
 	return &App{}
 }
-func (app *App) Load() (err error) {
-	if app.Config, err = lit.LoadAppConfig(); err != nil {
+func (app *App) Run() (err error) {
+	if app.config, err = lit.LoadAppConfig(); err != nil {
 		return err
 	}
-	app.Db = gorm.NewDB(app.Config.Db.DSN())
-	return nil
-}
+	app.gormService = gorm.NewGormService(&app.config.Db)
+	if err = app.gormService.Open(); err != nil {
+		return err
+	}
 
-func (app *App) Run(ctx context.Context) (err error) {
-	if app.Config == nil {
-		return lit.Errorf(lit.EINTERNAL, "app.Config is nil")
-	}
-	if app.Db == nil {
-		return lit.Errorf(lit.EINTERNAL, "app.Db is nil")
-	}
-	if err = app.Db.Open(); err != nil {
+	app.userService = gorm.NewUserService(app.gormService.GormDb)
+
+	app.httpServer = echo.NewHttp(&app.config.Http, &app.userService)
+
+	if err = app.httpServer.Open(); err != nil {
 		return err
 	}
 	log.Printf("App started")
@@ -39,13 +40,13 @@ func (app *App) Run(ctx context.Context) (err error) {
 }
 
 func (app *App) Close() (err error) {
-	// if app.HTTPServer != nil {
-	// 	if err := app.HTTPServer.Close(); err != nil {
-	// 		return err
-	// 	}
-	// }
-	if app.Db != nil {
-		if err := app.Db.Close(); err != nil {
+	if app.httpServer != nil {
+		if err := app.httpServer.Close(); err != nil {
+			return err
+		}
+	}
+	if app.gormService != nil {
+		if err := app.gormService.Close(); err != nil {
 			return err
 		}
 	}

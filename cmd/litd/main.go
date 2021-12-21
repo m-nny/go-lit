@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/signal"
 
 	"github.com/m-nny/go-lit/internal/lit"
 )
@@ -14,30 +13,21 @@ import (
 // Instead, we delegate most of our program to the Run() function.
 func main() {
 	// Setup signal handlers.
-	ctx, cancel := context.WithCancel(context.Background())
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() { <-c; cancel() }()
+	// ctx, cancel := context.WithCancel(context.Background())
+	// c := make(chan os.Signal, 1)
+	// signal.Notify(c, os.Interrupt)
+	// go func() { <-c; cancel() }()
 
 	// Instantiate a new type to represent our application.
 	// This type lets us shared setup code with our end-to-end tests.
 	app := NewApp()
 
-	if err := app.Load(); err != nil {
+	if err := app.Run(); err != nil {
 		app.Close()
 		fmt.Fprintln(os.Stderr, err)
-		lit.ReportError(ctx, err)
+		lit.ReportError(context.Background(), err)
 		os.Exit(1)
 	}
-	if err := app.Run(ctx); err != nil {
-		app.Close()
-		fmt.Fprintln(os.Stderr, err)
-		lit.ReportError(ctx, err)
-		os.Exit(1)
-	}
-
-	fmt.Fprintln(os.Stderr, "App finished. Press Ctrl-C to exit")
-	<-ctx.Done()
 
 	if err := app.Close(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

@@ -6,39 +6,39 @@ import (
 	"gorm.io/gorm"
 )
 
-type DB struct {
-	gorm *gorm.DB
-	// Datasource name.
-	DSN string
+type GormService struct {
+	GormDb *gorm.DB
 
-	// // Destination for events to be published.
-	// EventService lit.EventService
-
+	config *lit.DbConfig
 }
 
-func NewDB(dsn string) *DB {
-	return &DB{
-		DSN: dsn,
+func NewGormService(config *lit.DbConfig) *GormService {
+	return &GormService{
+		config: config,
 	}
 }
 
-func (db *DB) Open() (err error) {
-	if db.DSN == "" {
+func (d *GormService) Open() (err error) {
+	dsn := d.config.DSN()
+	if dsn == "" {
 		return lit.Errorf(lit.EINVALID, "dsn required")
 	}
-	if db.gorm, err = gorm.Open(postgres.Open(db.DSN), &gorm.Config{}); err != nil {
+	if d.GormDb, err = gorm.Open(postgres.Open(dsn), &gorm.Config{}); err != nil {
 		return err
 	}
 
-	db.gorm.AutoMigrate(&UserModel{})
+	err = d.GormDb.AutoMigrate(&UserModel{})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (db *DB) Close() (err error) {
+func (db *GormService) Close() (err error) {
 
-	if db.gorm != nil {
-		sqlDb, err := db.gorm.DB()
+	if db.GormDb != nil {
+		sqlDb, err := db.GormDb.DB()
 		if err != nil {
 			return err
 		}

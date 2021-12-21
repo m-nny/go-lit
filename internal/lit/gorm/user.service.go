@@ -33,11 +33,11 @@ func newUserModel(user *lit.User) *UserModel {
 var _ lit.UserService = (*UserService)(nil)
 
 type UserService struct {
-	gorm *gorm.DB
+	gormDb *gorm.DB
 }
 
-func NewUserService(gorm *gorm.DB) *UserService {
-	return &UserService{gorm: gorm}
+func NewUserService(db *gorm.DB) *UserService {
+	return &UserService{gormDb: db}
 }
 func (userModel *UserModel) User() *lit.User {
 	return &lit.User{
@@ -60,14 +60,14 @@ func Users(userModels []UserModel) []*lit.User {
 // CreateUser creates a new user.
 func (s *UserService) CreateUser(ctx context.Context, user *lit.User) error {
 	userModel := newUserModel(user)
-	result := s.gorm.WithContext(ctx).Create(userModel)
+	result := s.gormDb.Create(userModel)
 	return result.Error
 }
 
 // DeleteUser permanently deletes a user and all owned dials.
 // Returns ENOTFOUND if user does not exist.
 func (s *UserService) DeleteUser(ctx context.Context, id uint) error {
-	result := s.gorm.WithContext(ctx).Delete(&UserModel{}, id)
+	result := s.gormDb.Delete(&UserModel{}, id)
 	return result.Error
 }
 
@@ -75,16 +75,17 @@ func (s *UserService) DeleteUser(ctx context.Context, id uint) error {
 // Returns ENOTFOUND if user does not exist.
 func (s *UserService) FindUserById(ctx context.Context, id uint) (*lit.User, error) {
 	var userModel UserModel
-	result := s.gorm.WithContext(ctx).First(&userModel, id)
+	result := s.gormDb.First(&userModel, id)
 	return userModel.User(), result.Error
 }
 
 // FindUsers retrieves a list of users by filter. Also returns total count of
 // matching users which may differ from returned results if filter.Limit is specified.
 func (s *UserService) FindUsers(ctx context.Context, filter lit.UserFilter) ([]*lit.User, int, error) {
-	var userModels []UserModel
-	var count int64
-	result := s.gorm.WithContext(ctx).Where(filter).Find(&userModels).Count(&count)
+	userModels := []UserModel{}
+	// var userModels []UserModel
+	var count int64 = 0
+	result := s.gormDb.Find(&userModels)
 	return Users(userModels), int(count), result.Error
 }
 
@@ -92,10 +93,10 @@ func (s *UserService) FindUsers(ctx context.Context, filter lit.UserFilter) ([]*
 // not the user that is being updated. Returns ENOTFOUND if user does not exist.
 func (s *UserService) UpdateUser(ctx context.Context, id uint, upd lit.UserUpdate) (*lit.User, error) {
 	var userModel UserModel
-	result := s.gorm.WithContext(ctx).First(&userModel, id)
+	result := s.gormDb.First(&userModel, id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	result = s.gorm.WithContext(ctx).Model(&userModel).Updates(upd)
+	result = s.gormDb.Model(&userModel).Updates(upd)
 	return userModel.User(), result.Error
 }
