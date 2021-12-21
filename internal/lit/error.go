@@ -23,7 +23,7 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("wtf error: code=%s message=%s", e.Code, e.Message)
+	return fmt.Sprintf("lit error: code=%s message=%s", e.Code, e.Message)
 }
 
 func ErrorCode(err error) string {

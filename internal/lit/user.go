@@ -9,14 +9,12 @@ import (
 type User struct {
 	ID uint `json:"id"`
 
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Name           string `json:"name"`
+	HashedPassword string `json:"-"`
 
 	// Timestamps for user creation & last update.
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-
-	Roles []string `json:"roles"`
 }
 
 // Validate returns an error if the user contains invalid fields.
@@ -36,15 +34,15 @@ type UserService interface {
 
 	// Retrieves a list of users by filter. Also returns total count of matching
 	// users which may differ from returned results if filter.Limit is specified.
-	FindUsers(ctx context.Context, filter UserFilter) ([]*User, int, error)
+	FindUsers(ctx context.Context, filter *UserFilter) ([]*User, int, error)
 
 	// Creates a new user. This is only used for testing since users are typically
 	// created during the OAuth creation process in AuthService.CreateAuth().
-	CreateUser(ctx context.Context, user *User) error
+	CreateUser(ctx context.Context, user *User) (*User, error)
 
 	// Updates a user object. Returns EUNAUTHORIZED if current user is not
 	// the user that is being updated. Returns ENOTFOUND if user does not exist.
-	UpdateUser(ctx context.Context, id uint, upd UserUpdate) (*User, error)
+	UpdateUser(ctx context.Context, id uint, upd *UserUpdate) (*User, error)
 
 	// Permanently deletes a user and all owned submissions, problebs. Returns EUNAUTHORIZED
 	// if current user is not the user admin. Returns ENOTFOUND if user does not exist.
@@ -54,8 +52,7 @@ type UserService interface {
 // UserFilter represents a filter passed to FindUsers().
 type UserFilter struct {
 	// Filtering fields.
-	ID    *int    `json:"id"`
-	Email *string `json:"email"`
+	ID *int `json:"id"`
 
 	// Restrict to subset of results.
 	Offset int `json:"offset"`
@@ -64,6 +61,6 @@ type UserFilter struct {
 
 // UserUpdate represents a set of fields to be updated via UpdateUser().
 type UserUpdate struct {
-	Name  *string `json:"name"`
-	Email *string `json:"email"`
+	Name           string `json:"name"`
+	HashedPassword string `json:"-"`
 }

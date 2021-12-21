@@ -35,7 +35,7 @@ func run() error {
 
 	userService := g.NewUserService(gormService.GormDb)
 
-	users, _, err := userService.FindUsers(context.Background(), lit.UserFilter{})
+	users, _, err := userService.FindUsers(context.Background(), &lit.UserFilter{})
 	if err != nil {
 		return err
 	}
